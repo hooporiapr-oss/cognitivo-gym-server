@@ -102,6 +102,7 @@ const ES_JUEGO = (j) => JUEGOS.some((x) => x.id === j);
 
    This is the same inversion nivelDePuntos() does in fortress-vr.html.
    If the scale ever changes, it changes in both places. */
+const NIVEL_TECHO  = 25;             // every cell of the 5x5
 const TECHO_PUNTOS = 325;            // the triangular of 25, the whole 5x5
 function nivelDePuntos(p){
   p = parseInt(p, 10) || 0;
@@ -351,11 +352,24 @@ app.post('/tablero', async (req, res) => {
      level 4 in one game would look higher than a 7 next to it,
      because each quadrant would have stretched to its own range.
 
-     The floor of 6 is for the first day: with a single level recorded,
-     a scale of 1 would put that level hard against the outer edge and
-     the kid would have nowhere left to climb. */
-  const escala = Math.max(6, ...juegos.map((j) =>
-    Math.max(j.nivelGym, j.nivelMio, ...(j.nivelesEquipo.length ? j.nivelesEquipo : [0]))));
+     FIXED AT THE BOARD'S CEILING, and not at the highest level anyone
+     has reached. It used to be the latter, and that made a kid's own
+     arc move BACKWARDS when somebody else improved: at level 6 he was
+     6/11 of the way out, and the day another player hit 20 he was
+     6/20 — his board visibly shrank without him playing a bad round.
+     On an open team where everyone piles onto one record, that would
+     have happened within a week.
+
+     25 is not an arbitrary number: it is every cell of the 5x5, which
+     is the longest chain the board can hold, and 325 points. So a
+     full ring means a finished board and nothing on screen ever moves
+     except by playing.
+
+     The cost is honest and worth paying: early on everything sits
+     close to the middle, because level 6 of 25 really is a quarter of
+     the way. A scale that flattered the first week by stretching to
+     fit would have to take it back later. */
+  const escala = NIVEL_TECHO;
 
   /* ── THE KEY TO THE BOARD ────────────────────────────────────────
      The board is earned by playing all four. The server decides it,
@@ -405,4 +419,5 @@ if (require.main === module) {
   app.listen(PUERTO, () => console.log('gym server on ' + PUERTO));
 }
 
-module.exports = { app, usarBase, nivelDePuntos, normalizar, nuevoCodigo, JUEGOS, DOMINIOS, TECHO_PUNTOS };
+module.exports = { app, usarBase, nivelDePuntos, normalizar, nuevoCodigo,
+                   JUEGOS, DOMINIOS, TECHO_PUNTOS, NIVEL_TECHO };
