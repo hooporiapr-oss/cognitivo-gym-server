@@ -277,7 +277,7 @@ console.log('\n5 · The board returns not one code that is not yours\n');
      'the four come in the hub\'s order, which is the drawing\'s order');
   eq(r.cuerpo.equipo, { id: 'eq', nombre: 'Paradiso 6th' },
      'the only name that travels is the team\'s');
-  eq(r.cuerpo.escala, 25, 'and the drawing\'s scale is the highest level there is');
+  eq(r.cuerpo.escala, 25, 'and the drawing\'s scale is the 5x5 ceiling');
 
   /* This player has recall and fortress, and is two short. */
   eq(r.cuerpo.completo, false, 'with two games of four, the board is not open');
@@ -334,10 +334,45 @@ console.log('\n6 · The first day, and the player with no team\n');
   const recall = r.cuerpo.juegos.find((j) => j.juego === 'recall');
   eq(recall.equipo, [], 'and the team list comes back empty');
   eq(recall.mio, 1, 'but his score is there');
-  /* The scale's floor. With a single level recorded, a scale of 1
-     would leave that level hard against the outer edge: the kid
-     would have "finished" the board on his first round. */
-  eq(r.cuerpo.escala, 6, 'and the scale does not shrink to his one level: there is room to climb');
+  /* THE SCALE DOES NOT MOVE. One player at level 1, alone, with no
+     record anywhere, and the scale is still 25 — he is near the
+     middle because he IS near the middle. */
+  eq(r.cuerpo.escala, 25, 'and the scale is the same 25 it is for everybody else');
+}
+
+console.log('\n6b · And the scale never moves, whoever plays\n');
+{
+  /* THE FAILURE THIS REPLACED. With the scale set to the best level
+     around, a player's own arc moved backwards whenever somebody else
+     improved: at 6 of 11 he sat a bit past halfway, and the day
+     another player reached 20 the same score sat at 6 of 20. Nothing
+     he did changed, and his board shrank.
+
+     So: same player, same score, two very different gyms around him,
+     and the scale has to come back identical both times. */
+  const suyo = [{ codigo: 'ACD-EFG', juego: 'recall', mejor: 21, intentos: 1 }];
+
+  usarBase(baseFalsa({
+    gym_jugadores: [{ codigo: 'ACD-EFG', equipo: null }],
+    gym_marcas: suyo
+  }));
+  const solo = await pedir('/tablero', { codigo: 'ACD-EFG' });
+
+  usarBase(baseFalsa({
+    gym_jugadores: [{ codigo: 'ACD-EFG', equipo: null },
+                    { codigo: 'HJK-MNP', equipo: null }],
+    gym_marcas: suyo.concat([{ codigo: 'HJK-MNP', juego: 'recall', mejor: 325, intentos: 9 }])
+  }));
+  const conFenomeno = await pedir('/tablero', { codigo: 'ACD-EFG' });
+
+  eq([solo.cuerpo.escala, conFenomeno.cuerpo.escala], [25, 25],
+     'alone or beside somebody at the ceiling, the scale is 25 both times');
+  eq([solo.cuerpo.juegos[0].nivelMio, conFenomeno.cuerpo.juegos[0].nivelMio], [6, 6],
+     'and his own level is untouched by what anybody else did');
+  /* The record still moves, which is the point: the line to reach
+     comes closer or further, the player's own arc does not. */
+  eq([solo.cuerpo.juegos[0].nivelGym, conFenomeno.cuerpo.juegos[0].nivelGym], [6, 25],
+     'what changes is the record — the line to reach, not where he stands');
 }
 
 console.log('\n7 · The domain list\n');
