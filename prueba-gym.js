@@ -379,13 +379,31 @@ console.log('\n7 · The domain list\n');
 {
   const pasa = (o) => DOMINIOS.test(o) || /^https?:\/\/localhost(:\d+)?$/.test(o);
   for (const o of ['https://hooporia.mobi', 'https://www.hooporia.mobi',
-                   'https://cognitivo.digital', 'https://cognitivogym.com',
                    'http://localhost:8080']) si(pasa(o), o);
+
+  /* THE LIST ONLY EVER HOLDS DOMAINS WE SERVE FROM TODAY.
+
+     This used to assert that cognitivo.digital and cognitivogym.com
+     were accepted. Both came out on 26 October 2026, for the same
+     reason and it is worth writing down:
+
+       · cognitivo.digital was the main site for one day, the 25th,
+         and moved back to cadapunto.com on the 26th. Nothing is
+         served from it any more.
+       · cognitivogym.com was never registered. It sat here waiting
+         for the day it would be.
+
+     A retired name and an unregistered one are the same open door:
+     whoever registers it can call this server from their pages. A
+     domain earns its line the day it is pointed, not before and not
+     after. */
   for (const [o, t] of [
     ['', 'no origin at all'],
     ['https://hooporia.mobi.attacker.net', 'one that STARTS with ours'],
     ['https://mihooporia.mobi', 'ours with something stuck on the front'],
     ['https://hooporia.com', 'the .com, which is the retired domain'],
+    ['https://cognitivo.digital', 'the domain that lasted one day'],
+    ['https://cognitivogym.com', 'and one nobody has registered yet'],
     ['https://cognitivo.com', 'cognitivo with another ending'],
     ['http://hooporia.mobi', 'ours without encryption'],
     ['https://evil.com', 'any old one']
