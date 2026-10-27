@@ -55,21 +55,27 @@ function usarBase(otra){ base = otra }
 app.use(express.json({ limit: '8kb' }));
 
 /* ── Where calls are accepted from ────────────────────────────────
-   The mobile gym lives at hooporia.mobi and the main site at
-   cognitivo.digital. Both, because the board opens from the mobile
-   hub and also from the front page.
+   The mobile gym lives at hooporia.mobi, and that is the only place
+   a page calls this server from: the board, the hub and the four
+   stations are all served from there.
 
-   ANCHORED, and each ending on its own. The pledge server's list
-   broke twice on domain moves, silently both times: CORS gives no
-   error anyone can read — the browser blocks the response by itself
-   and the page just waits. A pattern with no ^ or $ accepts
-   hooporia.mobi.attacker.net, and folding cognitivo into the .com
-   group would accept cognitivo.com, which is not ours.
+   cognitivo.digital CAME OUT on 26 October 2026. The main site moved
+   there on the 25th and moved back to cadapunto.com on the 26th, so
+   nothing is served from it any more. A domain we no longer own has
+   no business in a list of allowed origins — if somebody else
+   registers it, their pages can call this server with it.
 
-   When cognitivogym.com is registered, it gets added HERE, the same
-   day the domain is pointed. This line is the second commit of every
-   move, and it is the one that gets forgotten. */
-const DOMINIOS = /^https:\/\/(www\.)?(hooporia\.mobi|cognitivo\.digital|cognitivogym\.com)$/;
+   ANCHORED, and ending on its own. The pledge server's list broke
+   twice on domain moves, silently both times: CORS gives no error
+   anyone can read — the browser blocks the response by itself and
+   the page just waits. A pattern with no ^ or $ would accept
+   hooporia.mobi.attacker.net.
+
+   WHEN A DOMAIN IS ADDED, IT IS ADDED THE DAY IT IS POINTED and not
+   before. A name sitting here unregistered is the same open door as
+   a retired one. This line is the second commit of every move, and
+   it is the one that gets forgotten. */
+const DOMINIOS = /^https:\/\/(www\.)?hooporia\.mobi$/;
 app.use((req, res, next) => {
   const o = req.headers.origin || '';
   if (DOMINIOS.test(o) || /^https?:\/\/localhost(:\d+)?$/.test(o)) {
